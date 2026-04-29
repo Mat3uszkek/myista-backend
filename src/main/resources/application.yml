@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: myista-backend
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:myista-dev-secret-key-change-in-production-at-least-32-chars!}
+    expiration-ms: 3600000   # 1 hour
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:5174}
+
+tenantapi:
+  host: ${TENANTAPI_HOST:http://localhost:8001}
+  app-id: ${TENANTAPI_APP_ID:demo}
+
+logging:
+  level:
+    com.ista.myista: DEBUG
