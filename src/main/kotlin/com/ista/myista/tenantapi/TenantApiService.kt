@@ -1,63 +1,127 @@
 package com.ista.myista.tenantapi
 
+import com.ista.myista.tenantapi.dto.*
 import org.springframework.stereotype.Service
 
 @Service
 class TenantApiService(private val client: TenantApiClient) {
 
-    // Each method: refreshes the TenantAPI access token, then makes the API call.
-    // This ensures we always use a valid token even if the stored one is stale.
-
-    fun getTenant(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/customer/Tenant", it, Map::class.java)
+    fun getTenant(refreshToken: String): UserInfo = call(refreshToken) {
+        client.get("/api/customer/tenant", it, UserInfo::class.java)
     }
 
-    fun getProperties(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/customer/Properties", it, Map::class.java)
+    fun getProperties(refreshToken: String): List<*> = call(refreshToken) {
+        client.get("/api/customer/properties", it, List::class.java)
     }
 
-    fun getBalance(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/finance/Balance", it, Map::class.java)
+    fun getBalance(refreshToken: String): Balance = call(refreshToken) {
+        client.get("/api/finance/balance", it, Balance::class.java)
     }
 
-    fun getTransactions(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/finance/TransactionHistory", it, Map::class.java)
+    fun getTransactions(refreshToken: String): List<*> = call(refreshToken) {
+        client.get("/api/finance/transactionhistory", it, List::class.java)
     }
 
-    fun getBillingAgent(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/customer/BillingAgent", it, Map::class.java)
+    fun getBillingAgent(refreshToken: String): List<*> = call(refreshToken) {
+        client.get("/api/customer/billingagent", it, List::class.java)
     }
 
-    fun getContact(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/customer/Contact", it, Map::class.java)
+    fun getContact(refreshToken: String): Contact = call(refreshToken) {
+        client.get("/api/customer/contact", it, Contact::class.java)
     }
 
-    fun updateContact(refreshToken: String, body: Map<String, Any>): Map<*, *> = call(refreshToken) {
-        client.postJson("/api/customer/Contact", it, body, Map::class.java)
+    fun updateContact(refreshToken: String, body: Map<String, Any>): Contact = call(refreshToken) {
+        client.postJson("/api/customer/contact", it, body, Contact::class.java)
     }
 
-    fun getMeterInfo(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/meter/Info", it, Map::class.java)
+    fun getMeterInfo(refreshToken: String): List<*> = call(refreshToken) {
+        client.get("/api/meter/info", it, List::class.java)
     }
 
-    fun getMeterReads(refreshToken: String, meterId: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/meter/Reads/$meterId", it, Map::class.java)
+    // meterId as query param + billableOnly=true to match old PHP behaviour
+    fun getMeterReads(refreshToken: String, meterId: String): MeterReadsResponse = call(refreshToken) {
+        client.get("/api/meter/reads", it, MeterReadsResponse::class.java,
+            mapOf("meterId" to meterId, "billableOnly" to "true"))
     }
 
-    fun getTariffs(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/meter/Tariffs", it, Map::class.java)
+    fun getTariffs(refreshToken: String): List<*> = call(refreshToken) {
+        client.get("/api/meter/tariffs", it, List::class.java)
     }
 
-    fun getSupplier(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/meter/Supplier", it, Map::class.java)
+    fun getSupplier(refreshToken: String): Supplier = call(refreshToken) {
+        client.get("/api/meter/supplier", it, Supplier::class.java)
     }
 
-    fun getDocuments(refreshToken: String): Map<*, *> = call(refreshToken) {
-        client.get("/api/document/Documents", it, Map::class.java)
+    fun getDocuments(refreshToken: String): List<*> = call(refreshToken) {
+        client.get("/api/customer/documents", it, List::class.java)
     }
 
-    fun postPayment(refreshToken: String, body: Map<String, Any>): Map<*, *> = call(refreshToken) {
-        client.postJson("/api/finance/postpayment", it, body, Map::class.java)
+    // Old PHP: api/finance/postpayment?amount=X&type=CC&chkMoNo=
+    fun postPayment(refreshToken: String, amount: Double): PaymentResult = call(refreshToken) {
+        client.get("/api/finance/postpayment", it, PaymentResult::class.java,
+            mapOf("amount" to amount, "type" to "CC", "chkMoNo" to ""))
+    }
+
+    fun paymentStatusUpdate(refreshToken: String, paymentId: String, status: String): Any = call(refreshToken) {
+        client.get("/api/finance/paymentstatusupdate", it, Any::class.java,
+            mapOf("paymentId" to paymentId, "status" to status))
+    }
+
+    fun updateStripeCustomerId(refreshToken: String, stripeCustomerId: String): Any = call(refreshToken) {
+        client.postJson("/api/customer/property/updatestripe", it,
+            mapOf("stripeCustomerId" to stripeCustomerId), Any::class.java)
+    }
+
+    // Profile endpoints
+    fun getUserProfile(refreshToken: String): UserInfo = call(refreshToken) {
+        client.get("/api/customer/tenant", it, UserInfo::class.java)
+    }
+
+    fun updateEmail(refreshToken: String, body: Map<String, Any>): Any = call(refreshToken) {
+        client.postJson("/api/customer/updateemail", it, body, Any::class.java)
+    }
+
+    fun changePassword(refreshToken: String, body: Map<String, Any>): Any = call(refreshToken) {
+        client.postJson("/api/customer/ChangePassword", it, body, Any::class.java)
+    }
+
+    // Auto Top-Up (Stripe / prepayment variant only)
+    fun getAutoTopUp(refreshToken: String): Any = call(refreshToken) {
+        client.get("/api/finance/autotopup", it, Any::class.java)
+    }
+
+    fun setupAutoTopUp(refreshToken: String, body: Map<String, Any>): Any = call(refreshToken) {
+        client.postJson("/api/finance/autotopup", it, body, Any::class.java)
+    }
+
+    fun cancelAutoTopUp(refreshToken: String): Any = call(refreshToken) {
+        client.delete("/api/finance/autotopup", it, Any::class.java)
+    }
+
+    // Registration (unauthenticated — forward full TenantAPI response body)
+    fun verifyAccount(body: Map<String, Any?>): Any = client.postJsonNoAuth("api/Account/Verification", body)
+    fun generateRegistrationCode(body: Map<String, Any?>): Any = client.postJsonNoAuth("api/Account/GenerateRegistrationCode", body)
+    fun registerAccount(body: Map<String, Any?>): Any = client.postJsonNoAuth("api/Account/Registration", body)
+    fun activateAccount(body: Map<String, Any?>): Any = client.postJsonNoAuth("api/Account/SetPassword", body)
+    fun requestPasswordReset(body: Map<String, Any?>): Any = client.postJsonNoAuth("api/Account/PasswordResetRequest", body)
+
+    // Kiosk (QuickPay guest) — uses separate TenantAPI credentials, no user session
+    fun kioskAccountBillInfo(accountNo: String): KioskAccount {
+        val tokens = client.authenticateKiosk()
+        return client.get("/api/kiosk/AccountBillInfo", tokens.accessToken, KioskAccount::class.java,
+            mapOf("AccountNo" to accountNo))
+    }
+
+    fun kioskMakePayment(accountNo: String, amount: Double, paymentRef: String): PaymentResult {
+        val tokens = client.authenticateKiosk()
+        return client.get("/api/kiosk/makepayment", tokens.accessToken, PaymentResult::class.java,
+            mapOf("AccountNo" to accountNo, "Amount" to amount, "PaymentRef" to paymentRef))
+    }
+
+    fun kioskPaymentStatusUpdate(paymentId: String, status: String): Any {
+        val tokens = client.authenticateKiosk()
+        return client.get("/api/kiosk/paymentStatusUpdate", tokens.accessToken, Any::class.java,
+            mapOf("PaymentId" to paymentId, "Status" to status))
     }
 
     private fun <T> call(refreshToken: String, block: (accessToken: String) -> T): T {

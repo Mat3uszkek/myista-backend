@@ -3,6 +3,8 @@ spring:
     name: myista-backend
   jackson:
     default-property-inclusion: non_null
+    mapper:
+      accept-case-insensitive-properties: true
 
 server:
   port: 8080
@@ -17,6 +19,40 @@ app:
 tenantapi:
   host: ${TENANTAPI_HOST:http://localhost:8001}
   app-id: ${TENANTAPI_APP_ID:demo}
+  kiosk-username: ${TENANTAPI_KIOSK_USERNAME:}
+  kiosk-password: ${TENANTAPI_KIOSK_PASSWORD:}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+
+ngenius:
+  url: ${NGENIUS_URL:}
+  username: ${NGENIUS_USERNAME:}
+  password: ${NGENIUS_PASSWORD:}
+  outlet: ${NGENIUS_OUTLET:}
+  webhook:
+    username: ${NGENIUS_WEBHOOK_USERNAME:}
+    password: ${NGENIUS_WEBHOOK_PASSWORD:}
+
+cbq:
+  url: ${CBQ_URL:}
+  merchant-id: ${CBQ_MERCHANT_ID:}
+  password: ${CBQ_PASSWORD:}
+  js-lib-url: ${CBQ_JS_LIB_URL:}
+  notification-url: ${CBQ_NOTIFICATION_URL:}
+
+# uksql01 — MinuteView DB: Help, N-Genius webhooks, consumption projection sproc
+# ukbiz04 — OperationsDW: seasonal consumption direct SQL
+mssql:
+  uksql01:
+    url: ${DB_UKSQL01_URL:jdbc:sqlserver://uksql01;databaseName=MinuteView;encrypt=false}
+    username: ${DB_UKSQL01_USERNAME:}
+    password: ${DB_UKSQL01_PASSWORD:}
+  ukbiz04:
+    url: ${DB_UKBIZ04_URL:jdbc:sqlserver://ukbiz04;databaseName=OperationsDW;encrypt=false}
+    username: ${DB_UKBIZ04_USERNAME:}
+    password: ${DB_UKBIZ04_PASSWORD:}
 
 logging:
   level:

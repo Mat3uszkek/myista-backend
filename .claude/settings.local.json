@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew --help)",
+      "Bash(gradle --version)"
+    ]
+  }
+}

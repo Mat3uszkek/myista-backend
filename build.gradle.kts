@@ -21,6 +21,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
@@ -28,6 +29,12 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
+    // Stripe
+    implementation("com.stripe:stripe-java:27.1.0")
+
+    // SQL Server (N-Genius webhooks, Consumption, Help)
+    runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

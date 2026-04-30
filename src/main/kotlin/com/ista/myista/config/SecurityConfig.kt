@@ -21,6 +21,8 @@ class SecurityConfig(private val jwtAuthFilter: JwtAuthFilter) {
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/api/config").permitAll()
+                auth.requestMatchers("/quickpay/**").permitAll()
+                auth.requestMatchers("/payments/webhook/**").permitAll()
                 auth.anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
