@@ -25,6 +25,14 @@ class AuthService(
     }
 
     @Suppress("UNCHECKED_CAST")
+    fun switchAccount(refreshToken: String, custId: Int): TokenResponse {
+        val tokens = tenantApiClient.refresh(refreshToken)
+        val switched = tenantApiClient.switchScope(tokens.accessToken, custId)
+        val jwt = buildJwt(switched.accessToken, switched.refreshToken)
+        return TokenResponse(accessToken = jwt, refreshToken = switched.refreshToken)
+    }
+
+    @Suppress("UNCHECKED_CAST")
     private fun buildJwt(tenantAccessToken: String, tenantRefreshToken: String): String {
         val response = tenantApiClient.get("/api/customer/Tenant", tenantAccessToken, Map::class.java)
             as Map<String, Any>

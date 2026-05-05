@@ -1,6 +1,7 @@
 package com.ista.myista.tenantapi
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -19,6 +20,7 @@ class TenantApiClient(
     @Value("\${tenantapi.app-id}") private val appId: String,
     @Value("\${tenantapi.kiosk-username:}") private val kioskUsername: String,
     @Value("\${tenantapi.kiosk-password:}") private val kioskPassword: String,
+    private val objectMapper: ObjectMapper,
 ) {
     private val client = RestClient.builder().baseUrl(host).build()
 
@@ -58,6 +60,28 @@ class TenantApiClient(
             .retrieve()
             .body(type)!!
     }
+
+    // Typed list deserialization — avoids type erasure of List::class.java which produces List<LinkedHashMap>
+    fun <T : Any> getList(path: String, accessToken: String, elementType: Class<T>, params: Map<String, Any> = emptyMap()): List<T> {
+        val uri = if (params.isEmpty()) path else {
+            val query = params.entries.joinToString("&") { "${it.key}=${it.value}" }
+            "$path?$query"
+        }
+        val raw = client.get().uri(uri)
+            .header("Authorization", "Bearer $accessToken")
+            .retrieve()
+            .body(String::class.java) ?: return emptyList()
+        val listType = objectMapper.typeFactory.constructCollectionType(List::class.java, elementType)
+        return objectMapper.readValue(raw, listType)
+    }
+
+    fun switchScope(accessToken: String, custId: Int): TenantTokens =
+        client.post().uri("/token/switchscope")
+            .header("Authorization", "Bearer $accessToken")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(mapOf("token" to accessToken, "scope" to custId.toString()))
+            .retrieve()
+            .body(TenantTokens::class.java)!!
 
     fun <T : Any, B : Any> postJson(path: String, accessToken: String, body: B, type: Class<T>): T =
         client.post().uri(path)

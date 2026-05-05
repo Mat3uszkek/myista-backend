@@ -66,7 +66,7 @@ class ConsumptionController(
                 "year" to r["year"],
                 "month" to r["month"],
                 "consumption" to r["summedvalue"],
-                "estimated" to ((r["computed"] as? Number)?.toInt() ?: 0) != 0,
+                "estimated" to (((r["computed"] as? Number)?.toInt() ?: 0) != 0),
                 "unit" to r["uom"],
             )
             if (id <= 12) lastYear.add(entry) else thisYear.add(entry)

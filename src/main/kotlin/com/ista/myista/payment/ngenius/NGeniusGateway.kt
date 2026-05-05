@@ -29,10 +29,7 @@ class NGeniusGateway(
             principal.tenantRefreshToken, request.amount
         )
         val paymentId = requireNotNull(paymentResult.paymentId) { "TenantAPI did not return paymentId" }
-        val balance = tenantApi.getBalance(principal.tenantRefreshToken)
-        val currency = balance.currency ?: "AED"
-
-        val redirectUrl = createOrderAndGetPaymentUrl(request.amount, currency, paymentId, null)
+        val redirectUrl = createOrderAndGetPaymentUrl(request.amount, request.currency, paymentId, null)
         return PaymentSession.NGeniusSession(paymentId, redirectUrl)
     }
 

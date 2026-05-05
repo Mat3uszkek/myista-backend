@@ -32,9 +32,17 @@ class PaymentStatusController(
         @RequestParam(required = false) err: String?,
     ): Map<String, Any?> {
         when (method) {
-            "stripe" -> if (status == "success") stripeGateway.deduplicatePaymentMethods(principal)
+            "stripe" -> { /* deduplication happens automatically in listPaymentMethods */ }
             "cbq" -> if (!pid.isNullOrBlank()) {
                 cbqGateway.confirmPayment(pid, principal)
+            }
+            "worldpay" -> if (!pid.isNullOrBlank()) {
+                val tenantStatus = when (status) {
+                    "success", "pending" -> "A"
+                    "cancel" -> "D"
+                    else -> "R"
+                }
+                tenantApi.paymentStatusUpdate(principal.tenantRefreshToken, pid, tenantStatus)
             }
         }
         val decodedError = err?.let { runCatching { String(java.util.Base64.getDecoder().decode(it)) }.getOrNull() }

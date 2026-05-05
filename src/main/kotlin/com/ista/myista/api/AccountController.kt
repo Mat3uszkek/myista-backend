@@ -13,7 +13,11 @@ class AccountController(private val tenantApi: TenantApiService) {
 
     @GetMapping("/profile")
     fun getProfile(@AuthenticationPrincipal principal: UserPrincipal) =
-        tenantApi.getUserProfile(principal.tenantRefreshToken)
+        tenantApi.getTenant(principal.tenantRefreshToken)
+
+    @GetMapping("/details")
+    fun getDetails(@AuthenticationPrincipal principal: UserPrincipal) =
+        tenantApi.getAccountDetails(principal.tenantRefreshToken)
 
     @PutMapping("/profile")
     fun updateEmail(

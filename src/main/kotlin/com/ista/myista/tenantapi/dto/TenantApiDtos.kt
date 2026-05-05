@@ -1,5 +1,6 @@
 package com.ista.myista.tenantapi.dto
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,27 +16,55 @@ data class UserInfo(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Account(
-    val accountNo: String? = null,
-    val address: String? = null,
-    val propertyType: String? = null,
-    val active: Boolean? = null,
+    @JsonAlias("AccountNo") val accountNo: String? = null,
+    @JsonAlias("Address") val address: String? = null,
+    @JsonAlias("PropertyType") val propertyType: String? = null,
+    @JsonAlias("Active") val active: Boolean? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+data class BillingAgentDetails(
+    @JsonAlias("ContactId") val contactId: Int? = null,
+    @JsonAlias("AttentionOf") val attentionOf: String? = null,
+    @JsonAlias("Name") val name: String? = null,
+    @JsonAlias("Phone") val phone: String? = null,
+    @JsonAlias("Email") val email: String? = null,
+    @JsonAlias("Address") val address: String? = null,
+    @JsonAlias("Web") val web: String? = null,
+)
+
+data class AccountDetails(
+    val profile: UserInfo,
+    val propertyAddress: String?,
+    val billingAgent: BillingAgentDetails?,
+)
+
+// TenantAPI returns PascalCase — @JsonAlias maps deserialization, camelCase field name
+// controls serialization back to the frontend.
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Balance(
-    val balance: Double? = null,
-    val currency: String? = null,
-    val outletRef: String? = null,
-    val accountNo: String? = null,
+    @JsonAlias("BalanceDue") val balanceDue: Double? = null,
+    @JsonAlias("LastInvoiceAmount") val lastInvoiceAmount: Double? = null,
+    @JsonAlias("LastInvoiceStatus") val lastInvoiceStatus: String? = null,
+    @JsonAlias("LastInvoiceDate") val lastInvoiceDate: String? = null,
+    @JsonAlias("LastInvoicePeriodFrom") val lastInvoicePeriodFrom: String? = null,
+    @JsonAlias("LastInvoicePeriodTo") val lastInvoicePeriodTo: String? = null,
+    @JsonAlias("PaymentMethod") val paymentMethod: String? = null,
+    @JsonAlias("InvoiceTerms") val invoiceTerms: Int? = null,
+    // Prepayment / real-time billing only
+    @JsonAlias("EmergencyCredit") val emergencyCredit: Double? = null,
+    @JsonAlias("AlarmCredit") val alarmCredit: Double? = null,
+    @JsonAlias("SupplyStatus") val supplyStatus: Boolean? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Transaction(
-    val transactionDate: String? = null,
-    val amount: Double? = null,
-    val description: String? = null,
-    val reference: String? = null,
-    val type: String? = null,
+    @JsonAlias("Type") val type: String? = null,
+    @JsonAlias("Datetime") val datetime: String? = null,
+    @JsonAlias("Value") val value: Double? = null,
+    @JsonAlias("SubType") val subType: String? = null,
+    @JsonAlias("DocumentId") val documentId: String? = null,
+    @JsonAlias("Code") val code: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

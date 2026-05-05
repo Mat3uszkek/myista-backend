@@ -42,6 +42,18 @@ cbq:
   js-lib-url: ${CBQ_JS_LIB_URL:}
   notification-url: ${CBQ_NOTIFICATION_URL:}
 
+worldpay:
+  url: ${WORLDPAY_URL:https://secure.worldpay.com/jsp/merchant/xml/paymentService.jsp}
+  merchant-code: ${WORLDPAY_MERCHANT_CODE:}
+  xml-password: ${WORLDPAY_XML_PASSWORD:}
+  js-lib-url: ${WORLDPAY_JS_LIB_URL:https://secure.worldpay.com/wcc/wrappedMessages}
+
+aps:
+  merchant-identifier: ${APS_MERCHANT_IDENTIFIER:}
+  access-code: ${APS_ACCESS_CODE:}
+  sha-request-phrase: ${APS_SHA_REQUEST_PHRASE:}
+  hpp-url: ${APS_HPP_URL:https://checkout.payfort.com/FortAPI/paymentPage}
+
 # uksql01 — MinuteView DB: Help, N-Genius webhooks, consumption projection sproc
 # ukbiz04 — OperationsDW: seasonal consumption direct SQL
 mssql:

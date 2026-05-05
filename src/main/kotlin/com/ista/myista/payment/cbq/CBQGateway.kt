@@ -31,7 +31,7 @@ class CBQGateway(
             principal.tenantRefreshToken, request.amount
         )
         val paymentId = requireNotNull(paymentResult.paymentId) { "TenantAPI did not return paymentId" }
-        return createCBQSession(request.amount, "QAR", paymentId)
+        return createCBQSession(request.amount, request.currency, paymentId)
     }
 
     override fun voidPayment(paymentId: String, principal: UserPrincipal) {

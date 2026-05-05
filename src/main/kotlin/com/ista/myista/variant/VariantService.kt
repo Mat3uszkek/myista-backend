@@ -18,6 +18,7 @@ class VariantService {
     // TenantAPI identifiers per variant — match values in MinuteView.mi site_variants table
     private val schemeIds = mapOf("uk" to 1, "uae" to 2, "thameswey" to 3, "prepayment" to 5, "qatar" to 6, "be" to 7)
     private val apiVariantIds = mapOf("uk" to 1, "uae" to 2, "thameswey" to 3, "prepayment" to 5, "qatar" to 6, "be" to 7)
+    private val currencies = mapOf("uk" to "GBP", "uae" to "AED", "thameswey" to "GBP", "prepayment" to "GBP", "qatar" to "QAR", "be" to "EUR")
 
     fun detect(request: HttpServletRequest): String {
         val host = request.serverName.lowercase()
@@ -28,4 +29,5 @@ class VariantService {
 
     fun getSchemeId(variant: String): Int = schemeIds[variant] ?: 1
     fun getApiVariantId(variant: String): Int = apiVariantIds[variant] ?: 1
+    fun getCurrency(variant: String): String = currencies[variant] ?: "GBP"
 }

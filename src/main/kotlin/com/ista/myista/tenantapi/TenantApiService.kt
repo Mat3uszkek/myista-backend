@@ -18,12 +18,26 @@ class TenantApiService(private val client: TenantApiClient) {
         client.get("/api/finance/balance", it, Balance::class.java)
     }
 
-    fun getTransactions(refreshToken: String): List<*> = call(refreshToken) {
-        client.get("/api/finance/transactionhistory", it, List::class.java)
+    fun getTransactions(refreshToken: String, page: Int = 1, limit: Int = 20): List<Transaction> = call(refreshToken) {
+        client.getList("/api/finance/transactionhistory", it, Transaction::class.java,
+            mapOf("page" to page, "limit" to limit))
     }
 
-    fun getBillingAgent(refreshToken: String): List<*> = call(refreshToken) {
-        client.get("/api/customer/billingagent", it, List::class.java)
+    fun getBillingAgent(refreshToken: String): List<BillingAgentDetails> = call(refreshToken) {
+        client.getList("/api/customer/billingagent", it, BillingAgentDetails::class.java)
+    }
+
+    fun getAccountDetails(refreshToken: String): AccountDetails = call(refreshToken) { token ->
+        val profile = client.get("/api/customer/tenant", token, UserInfo::class.java)
+        val properties = client.getList("/api/customer/properties", token, Account::class.java)
+        val agents = client.getList("/api/customer/billingagent", token, BillingAgentDetails::class.java)
+        val propertyAddress = properties.firstOrNull { it.active == true }?.address
+            ?: properties.firstOrNull()?.address
+        AccountDetails(
+            profile = profile,
+            propertyAddress = propertyAddress,
+            billingAgent = agents.firstOrNull(),
+        )
     }
 
     fun getContact(refreshToken: String): Contact = call(refreshToken) {
@@ -56,6 +70,11 @@ class TenantApiService(private val client: TenantApiClient) {
         client.get("/api/customer/documents", it, List::class.java)
     }
 
+    fun requestSoa(refreshToken: String, variantId: Int): Any = call(refreshToken) {
+        client.get("/api/finance/RequestAccountSummaryDocument", it, Any::class.java,
+            mapOf("variantId" to variantId))
+    }
+
     // Old PHP: api/finance/postpayment?amount=X&type=CC&chkMoNo=
     fun postPayment(refreshToken: String, amount: Double): PaymentResult = call(refreshToken) {
         client.get("/api/finance/postpayment", it, PaymentResult::class.java,
@@ -70,11 +89,6 @@ class TenantApiService(private val client: TenantApiClient) {
     fun updateStripeCustomerId(refreshToken: String, stripeCustomerId: String): Any = call(refreshToken) {
         client.postJson("/api/customer/property/updatestripe", it,
             mapOf("stripeCustomerId" to stripeCustomerId), Any::class.java)
-    }
-
-    // Profile endpoints
-    fun getUserProfile(refreshToken: String): UserInfo = call(refreshToken) {
-        client.get("/api/customer/tenant", it, UserInfo::class.java)
     }
 
     fun updateEmail(refreshToken: String, body: Map<String, Any>): Any = call(refreshToken) {

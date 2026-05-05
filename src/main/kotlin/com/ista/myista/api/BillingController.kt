@@ -3,6 +3,7 @@ package com.ista.myista.api
 import com.ista.myista.auth.UserPrincipal
 import com.ista.myista.payment.PaymentGatewayRegistry
 import com.ista.myista.payment.PaymentRequest
+import com.ista.myista.payment.aps.APSGateway
 import com.ista.myista.payment.stripe.StripeGateway
 import com.ista.myista.tenantapi.TenantApiService
 import com.ista.myista.variant.VariantService
@@ -19,14 +20,18 @@ class BillingController(
     private val gatewayRegistry: PaymentGatewayRegistry,
     private val variantService: VariantService,
     private val stripeGateway: StripeGateway,
+    private val apsGateway: APSGateway,
 ) {
     @GetMapping("/balance")
     fun getBalance(@AuthenticationPrincipal principal: UserPrincipal) =
         tenantApi.getBalance(principal.tenantRefreshToken)
 
     @GetMapping("/transactions")
-    fun getTransactions(@AuthenticationPrincipal principal: UserPrincipal) =
-        tenantApi.getTransactions(principal.tenantRefreshToken)
+    fun getTransactions(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "20") limit: Int,
+    ) = tenantApi.getTransactions(principal.tenantRefreshToken, page, limit)
 
     @GetMapping("/billing-agent")
     fun getBillingAgent(@AuthenticationPrincipal principal: UserPrincipal) =
@@ -44,7 +49,8 @@ class BillingController(
         val amount = (body["amount"] as? Number)?.toDouble()
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing amount")
         val accountNo = body["accountNo"] as? String ?: principal.accountNumber
-        return gateway.createPaymentSession(PaymentRequest(amount, accountNo), principal)
+        val currency = variantService.getCurrency(variant)
+        return gateway.createPaymentSession(PaymentRequest(amount, accountNo, currency), principal)
     }
 
     @PostMapping("/payments/void")
@@ -59,6 +65,20 @@ class BillingController(
         val paymentId = body["paymentId"] as? String
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing paymentId")
         gateway.voidPayment(paymentId, principal)
+    }
+
+    // APS (Amazon Payment Services / PayFort): confirm payment after redirect
+    @PostMapping("/payments/aps/confirm")
+    fun confirmAps(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @RequestBody body: Map<String, String>,
+    ): Map<String, Any?> {
+        val paymentId = body["paymentId"]
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing paymentId")
+        val responseCode = body["responseCode"] ?: ""
+        apsGateway.confirmPayment(paymentId, responseCode, principal)
+        val success = responseCode.startsWith("0")
+        return mapOf("success" to success, "paymentId" to paymentId)
     }
 
     // Stripe-specific: setup intent for saving cards

@@ -36,7 +36,8 @@ class QuickPayController(
         val amount = (body["amount"] as? Number)?.toDouble()
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing amount")
         val email = body["email"] as? String
-        return gateway.createGuestPaymentSession(GuestPaymentRequest(amount, accountNo, email))
+        val currency = variantService.getCurrency(variant)
+        return gateway.createGuestPaymentSession(GuestPaymentRequest(amount, accountNo, email, currency))
     }
 
     @GetMapping("/status/{method}/{status}")

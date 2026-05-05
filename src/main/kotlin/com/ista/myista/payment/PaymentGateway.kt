@@ -15,12 +15,14 @@ interface GuestPaymentGateway {
 data class PaymentRequest(
     val amount: Double,
     val accountNo: String,
+    val currency: String = "GBP",
 )
 
 data class GuestPaymentRequest(
     val amount: Double,
     val accountNo: String,
     val email: String? = null,
+    val currency: String = "AED",
 )
 
 sealed class PaymentSession {
@@ -49,5 +51,27 @@ sealed class PaymentSession {
         val jsLibUrl: String,
     ) : PaymentSession() {
         override val method = "cbq"
+    }
+
+    data class WorldPaySession(
+        override val paymentId: String,
+        val hppUrl: String,
+        val libUrl: String,
+    ) : PaymentSession() {
+        override val method = "worldpay"
+    }
+
+    data class APSSession(
+        override val paymentId: String,
+        val merchantReference: String,
+        val accessCode: String,
+        val merchantIdentifier: String,
+        val shaRequestPhrase: String,
+        val amount: Int,
+        val currency: String,
+        val customerEmail: String,
+        val hppUrl: String,
+    ) : PaymentSession() {
+        override val method = "aps"
     }
 }
